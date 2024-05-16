@@ -5,16 +5,24 @@ from database import engine
 from fastapi import status
 from model import TodoRequest
 from datetime import datetime
+from fastapi.middleware.cors import CORSMiddleware
 
-session = Session(autocommit=False,autoflush=False,bind=engine)
+origins=[
+    "http://192.168.40.94:3000",
+]
+
+session = Session(bind=engine)
 
 app = FastAPI(debug=True)
 
-
+app.add_middleware(
+     CORSMiddleware,
+    allow_origins=origins,
+)
 
 @app.get("/")
-async def home():
-    return {"hello world"}
+async def main():
+    return {"message": "Hello World"}
 
 
 @app.get("/list/{id}")
