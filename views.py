@@ -1,4 +1,4 @@
-from fastapi import FastAPI,HTTPException,Depends
+from fastapi import FastAPI,HTTPException
 from model import ToDo
 from sqlalchemy.orm import Session
 from database import engine
@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 origins=[
     "http://192.168.40.94:3000",
+    "http://localhost:5173",
 ]
 
 session = Session(bind=engine)
@@ -18,6 +19,8 @@ app = FastAPI(debug=True)
 app.add_middleware(
      CORSMiddleware,
     allow_origins=origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/")
@@ -39,13 +42,13 @@ async def list_all_task():
    with session as SessIon:
       result=SessIon.query(ToDo).all()
       if not result:
-         raise HTTPException(status_code=404,detail="No task's found")
+         raise HTTPException(status_code=204,detail="No task's found")
          
       return ({"id":i.id,"task":i.task,"created time":i.created_date ,"status":i.task_status,"updated date":i.updated_date} for i in result)
 
 @app.post("/create/",status_code=status.HTTP_200_OK)
 async def create_todo(todo:TodoRequest):    
-    tododb=ToDo(task=todo.task)
+    tododb=ToDo(task=todo.task,task_status=todo.task_status)
     with session as SessIon:
         SessIon.add(tododb)
         session.commit()
